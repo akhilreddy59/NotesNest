@@ -38,7 +38,7 @@ const NotesList = () => {
   useEffect(() => {
     setLoading(true);
     axios
-      .get("http://localhost:5000/api/notes/approved")
+      .get("https://notes-nest-b.onrender.com/api/notes/approved")
       .then((res) => {
         setNotes(res.data);
         setFilteredNotes(res.data);

@@ -8,7 +8,6 @@ import {
   Typography,
   MenuItem,
   Paper,
-  Chip,
   Snackbar,
   Alert,
 } from "@mui/material";
@@ -35,52 +34,38 @@ const UploadPage = () => {
   const [contributor, setContributor] = useState("");
   const [driveLink, setDriveLink] = useState("");
   const [category, setCategory] = useState("");
-  const [file, setFile] = useState(null);
   const [snackbar, setSnackbar] = useState({
     open: false,
     success: true,
     message: "",
   });
 
-  const handleFileChange = (e) => {
-    const selectedFile = e.target.files[0];
-    if (selectedFile && selectedFile.size > 5 * 1024 * 1024) {
-      alert("❌ File size exceeds 5MB. Please upload a smaller file.");
-      return;
-    }
-    setFile(selectedFile);
-  };
-
   const handleUpload = async (e) => {
     e.preventDefault();
-    if (
-      !title ||
-      !subject ||
-      !contributor ||
-      !file ||
-      !driveLink ||
-      !category
-    ) {
+
+    if (!title || !subject || !contributor || !driveLink || !category) {
       return setSnackbar({
         open: true,
         success: false,
-        message: "Please fill all fields and select a file.",
+        message: "❌ Please fill all fields.",
       });
     }
 
-    const formData = new FormData();
-    formData.append("title", title);
-    formData.append("subject", subject);
-    formData.append("contributor", contributor);
-    formData.append("driveLink", driveLink);
-    formData.append("category", category);
-    formData.append("file", file);
+    const data = {
+      title,
+      subject,
+      contributor,
+      driveLink,
+      category,
+    };
 
     try {
       await axios.post(
         "https://notes-nest-b.onrender.com/api/notes/upload",
-        formData
+        data,
+        { headers: { "Content-Type": "application/json" } }
       );
+
       setSnackbar({
         open: true,
         success: true,
@@ -93,7 +78,6 @@ const UploadPage = () => {
       setContributor("");
       setDriveLink("");
       setCategory("");
-      setFile(null);
     } catch (error) {
       console.error("Upload failed", error);
       setSnackbar({
@@ -146,7 +130,7 @@ const UploadPage = () => {
         </Typography>
 
         {/* ✅ Upload Form */}
-        <form onSubmit={handleUpload} encType="multipart/form-data">
+        <form onSubmit={handleUpload}>
           <TextField
             label="Title"
             fullWidth
@@ -182,9 +166,9 @@ const UploadPage = () => {
           />
 
           <TextField
-            label="Google Drive Link / type 'N/A' if not applicable"
+            label="Drive Link"
             fullWidth
-            variant="outlined"
+            required
             value={driveLink}
             onChange={(e) => setDriveLink(e.target.value)}
             sx={{ mb: 2 }}
@@ -197,7 +181,7 @@ const UploadPage = () => {
             variant="outlined"
             value={category}
             onChange={(e) => setCategory(e.target.value)}
-            sx={{ mb: 2 }}
+            sx={{ mb: 3 }}
           >
             {categories.map((cat, idx) => (
               <MenuItem key={idx} value={cat}>
@@ -205,41 +189,6 @@ const UploadPage = () => {
               </MenuItem>
             ))}
           </TextField>
-
-          <Button
-            variant="outlined"
-            component="label"
-            fullWidth
-            sx={{ mb: 2, textTransform: "none", fontWeight: "bold" }}
-          >
-            Choose File
-            <input type="file" hidden onChange={handleFileChange} />
-          </Button>
-
-          {file && (
-            <>
-              <Chip
-                label={file.name}
-                color="primary"
-                variant="outlined"
-                sx={{ mb: 2 }}
-              />
-              {file.type === "application/pdf" && (
-                <Box mt={2}>
-                  <Typography variant="subtitle2" sx={{ mb: 1 }}>
-                    Preview:
-                  </Typography>
-                  <iframe
-                    src={URL.createObjectURL(file)}
-                    title="PDF Preview"
-                    width="100%"
-                    height="300px"
-                    style={{ border: "1px solid #ccc", borderRadius: 8 }}
-                  />
-                </Box>
-              )}
-            </>
-          )}
 
           <Button
             type="submit"

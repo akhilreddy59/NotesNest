@@ -38,9 +38,12 @@ const AdminPage = () => {
 
   const fetchPendingNotes = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/notes/pending", {
-        headers: { "x-admin-secret": ADMIN_SECRET },
-      });
+      const res = await axios.get(
+        "https://notes-nest-b.onrender.com/api/notes/pending",
+        {
+          headers: { "x-admin-secret": ADMIN_SECRET },
+        }
+      );
       setPendingNotes(res.data);
     } catch (err) {
       console.error("Error fetching pending notes:", err);
@@ -49,7 +52,9 @@ const AdminPage = () => {
 
   const fetchApprovedNotes = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/notes/approved");
+      const res = await axios.get(
+        "https://notes-nest-b.onrender.com/api/notes/approved"
+      );
       setApprovedNotes(res.data);
     } catch (err) {
       console.error("Error fetching approved notes:", err);
@@ -93,7 +98,7 @@ const AdminPage = () => {
     try {
       if (dialogAction === "approve") {
         await axios.patch(
-          `http://localhost:5000/api/notes/approve/${selectedNoteId}`,
+          `https://notes-nest-b.onrender.com/api/notes/approve/${selectedNoteId}`,
           {},
           {
             headers: { "x-admin-secret": ADMIN_SECRET },
@@ -110,7 +115,7 @@ const AdminPage = () => {
         fetchApprovedNotes();
       } else if (dialogAction === "reject" || dialogAction === "delete") {
         await axios.delete(
-          `http://localhost:5000/api/notes/delete/${selectedNoteId}`,
+          `https://notes-nest-b.onrender.com/api/notes/delete/${selectedNoteId}`,
           {
             headers: { "x-admin-secret": ADMIN_SECRET },
           }

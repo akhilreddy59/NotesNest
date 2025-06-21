@@ -182,7 +182,7 @@ const UploadPage = () => {
           />
 
           <TextField
-            label="Google Drive Link"
+            label="Google Drive Link / type 'N/A' if not applicable"
             fullWidth
             variant="outlined"
             value={driveLink}

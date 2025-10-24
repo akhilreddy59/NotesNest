@@ -31,11 +31,13 @@ const subjects = [
 const categories = ["Lecture Notes", "Assignments", "Exam Papers", "Others"];
 
 const UploadPage = () => {
+  const fileInputRef = React.useRef(null);
   const [title, setTitle] = useState("");
   const [subject, setSubject] = useState("");
   const [contributor, setContributor] = useState("");
   const [driveLink, setDriveLink] = useState("");
   const [category, setCategory] = useState("");
+  const [selectedFile, setSelectedFile] = useState(null);
   const [snackbar, setSnackbar] = useState({
     open: false,
     success: true,
@@ -59,11 +61,25 @@ const UploadPage = () => {
       contributor,
       driveLink,
       category,
+      file: selectedFile, // Add selected file to data object
     };
 
+    const formData = new FormData();
+    formData.append("title", data.title);
+    formData.append("subject", data.subject);
+    formData.append("contributor", data.contributor);
+    formData.append("category", data.category);
+
+    if (data.file) {
+      formData.append("file", data.file); // ✅ must match backend multer field
+    }
+    if (data.driveLink) {
+      formData.append("driveLink", data.driveLink);
+    }
+
     try {
-      await axios.post(`${backendUrl}/api/notes/upload`, data, {
-        headers: { "Content-Type": "application/json" },
+      await axios.post(`${backendUrl}/api/notes/upload`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
       });
 
       setSnackbar({
@@ -78,8 +94,12 @@ const UploadPage = () => {
       setContributor("");
       setDriveLink("");
       setCategory("");
+      setSelectedFile(null);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
     } catch (error) {
-      console.error("Upload failed", error);
+      console.error("Upload failed:", error);
       setSnackbar({
         open: true,
         success: false,
@@ -189,6 +209,15 @@ const UploadPage = () => {
               </MenuItem>
             ))}
           </TextField>
+
+          {/* File Upload Field */}
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={(e) => setSelectedFile(e.target.files[0])}
+            style={{ marginBottom: "1rem", width: "100%" }}
+            accept=".pdf,.doc,.docx"
+          />
 
           <Button
             type="submit"

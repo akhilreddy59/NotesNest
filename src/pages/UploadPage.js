@@ -14,6 +14,8 @@ import {
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import axios from "axios";
 
+const backendUrl = process.env.REACT_APP_BACKEND_URL;
+
 const subjects = [
   "Mathematics",
   "Physics",
@@ -60,7 +62,7 @@ const UploadPage = () => {
     };
 
     try {
-      await axios.post("http://localhost:5000/api/notes/upload", data, {
+      await axios.post(`${backendUrl}/api/notes/upload`, data, {
         headers: { "Content-Type": "application/json" },
       });
 

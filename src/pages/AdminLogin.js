@@ -4,6 +4,8 @@ import { Box, Paper, TextField, Button, Typography } from "@mui/material";
 import LockIcon from "@mui/icons-material/Lock";
 import { useNavigate } from "react-router-dom";
 
+const backendUrl = process.env.REACT_APP_BACKEND_URL;
+
 const AdminLogin = () => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -14,7 +16,7 @@ const AdminLogin = () => {
     setError("");
 
     try {
-      const res = await fetch("http://localhost:5000/api/admin/login", {
+      const res = await fetch(`${backendUrl}/api/admin/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

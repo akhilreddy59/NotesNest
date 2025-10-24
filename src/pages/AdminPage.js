@@ -22,6 +22,8 @@ import CancelIcon from "@mui/icons-material/Cancel";
 import LogoutIcon from "@mui/icons-material/Logout";
 import DeleteIcon from "@mui/icons-material/Delete";
 
+const backendUrl = process.env.REACT_APP_BACKEND_URL;
+
 const AdminPage = () => {
   const [pendingNotes, setPendingNotes] = useState([]);
   const [approvedNotes, setApprovedNotes] = useState([]);
@@ -37,7 +39,7 @@ const AdminPage = () => {
   const fetchPendingNotes = async () => {
     try {
       const token = localStorage.getItem("adminToken");
-      const res = await axios.get("http://localhost:5000/api/notes/pending", {
+      const res = await axios.get(`${backendUrl}/api/notes/pending`, {
         headers: { Authorization: token ? `Bearer ${token}` : "" },
       });
       setPendingNotes(res.data);
@@ -48,7 +50,7 @@ const AdminPage = () => {
 
   const fetchApprovedNotes = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/notes/approved");
+      const res = await axios.get(`${backendUrl}/api/notes/approved`);
       setApprovedNotes(res.data);
     } catch (err) {
       console.error("Error fetching approved notes:", err);
@@ -87,7 +89,7 @@ const AdminPage = () => {
       if (dialogAction === "approve") {
         const token = localStorage.getItem("adminToken");
         await axios.patch(
-          `http://localhost:5000/api/notes/approve/${selectedNoteId}`,
+          `${backendUrl}/api/notes/approve/${selectedNoteId}`,
           {},
           {
             headers: { Authorization: token ? `Bearer ${token}` : "" },
@@ -104,12 +106,9 @@ const AdminPage = () => {
         fetchApprovedNotes();
       } else if (dialogAction === "reject" || dialogAction === "delete") {
         const token = localStorage.getItem("adminToken");
-        await axios.delete(
-          `http://localhost:5000/api/notes/delete/${selectedNoteId}`,
-          {
-            headers: { Authorization: token ? `Bearer ${token}` : "" },
-          }
-        );
+        await axios.delete(`${backendUrl}/api/notes/delete/${selectedNoteId}`, {
+          headers: { Authorization: token ? `Bearer ${token}` : "" },
+        });
         setSnackbar({
           open: true,
           message:

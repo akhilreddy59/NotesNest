@@ -60,11 +60,9 @@ const UploadPage = () => {
     };
 
     try {
-      await axios.post(
-        "https://notes-nest-b.onrender.com/api/notes/upload",
-        data,
-        { headers: { "Content-Type": "application/json" } }
-      );
+      await axios.post("http://localhost:5000/api/notes/upload", data, {
+        headers: { "Content-Type": "application/json" },
+      });
 
       setSnackbar({
         open: true,

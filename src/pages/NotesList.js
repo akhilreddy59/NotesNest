@@ -141,7 +141,7 @@ const NotesList = () => {
                     variant="outlined"
                     color="primary"
                     startIcon={<DownloadIcon />}
-                    href={`https://notes-nest-b.onrender.com/${note.file}`}
+                    href={note.driveLink}
                     target="_blank"
                     rel="noopener noreferrer"
                   >

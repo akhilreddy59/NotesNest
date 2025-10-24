@@ -26,10 +26,11 @@ const Navbar = () => {
 
   // ✅ Only allow Admin Panel if the correct admin secret is in localStorage
   useEffect(() => {
-    const storedSecret = localStorage.getItem("admin-secret");
-    if (storedSecret === "notesnest123") {
-      setIsAdmin(true);
-    }
+    // Show Admin link when a valid admin token exists in localStorage.
+    // AdminLogin stores the token under 'adminToken'. This keeps auth
+    // checks consistent across the app.
+    const token = localStorage.getItem("adminToken");
+    if (token) setIsAdmin(true);
   }, []);
 
   const navLinks = [

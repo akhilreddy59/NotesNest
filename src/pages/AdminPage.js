@@ -22,8 +22,6 @@ import CancelIcon from "@mui/icons-material/Cancel";
 import LogoutIcon from "@mui/icons-material/Logout";
 import DeleteIcon from "@mui/icons-material/Delete";
 
-const ADMIN_SECRET = "sunrisers";
-
 const AdminPage = () => {
   const [pendingNotes, setPendingNotes] = useState([]);
   const [approvedNotes, setApprovedNotes] = useState([]);
@@ -38,12 +36,10 @@ const AdminPage = () => {
 
   const fetchPendingNotes = async () => {
     try {
-      const res = await axios.get(
-        "https://notes-nest-b.onrender.com/api/notes/pending",
-        {
-          headers: { "x-admin-secret": ADMIN_SECRET },
-        }
-      );
+      const token = localStorage.getItem("adminToken");
+      const res = await axios.get("http://localhost:5000/api/notes/pending", {
+        headers: { Authorization: token ? `Bearer ${token}` : "" },
+      });
       setPendingNotes(res.data);
     } catch (err) {
       console.error("Error fetching pending notes:", err);
@@ -52,9 +48,7 @@ const AdminPage = () => {
 
   const fetchApprovedNotes = async () => {
     try {
-      const res = await axios.get(
-        "https://notes-nest-b.onrender.com/api/notes/approved"
-      );
+      const res = await axios.get("http://localhost:5000/api/notes/approved");
       setApprovedNotes(res.data);
     } catch (err) {
       console.error("Error fetching approved notes:", err);
@@ -62,22 +56,16 @@ const AdminPage = () => {
   };
 
   useEffect(() => {
-    const storedSecret = localStorage.getItem("admin-secret");
-
-    if (storedSecret !== ADMIN_SECRET) {
-      const entered = prompt("Enter Admin Secret to access this page:");
-      if (entered === ADMIN_SECRET) {
-        localStorage.setItem("admin-secret", entered);
-        fetchPendingNotes();
-        fetchApprovedNotes();
-      } else {
-        alert("Unauthorized access.");
-        window.location.href = "/";
-      }
-    } else {
-      fetchPendingNotes();
-      fetchApprovedNotes();
+    // Require an admin token stored by the AdminLogin flow. If it's
+    // missing, redirect to the login page so the user can authenticate.
+    const token = localStorage.getItem("adminToken");
+    if (!token) {
+      window.location.href = "/admin-login";
+      return;
     }
+
+    fetchPendingNotes();
+    fetchApprovedNotes();
   }, []);
 
   const handleDialogOpen = (action, noteId) => {
@@ -97,11 +85,12 @@ const AdminPage = () => {
 
     try {
       if (dialogAction === "approve") {
+        const token = localStorage.getItem("adminToken");
         await axios.patch(
-          `https://notes-nest-b.onrender.com/api/notes/approve/${selectedNoteId}`,
+          `http://localhost:5000/api/notes/approve/${selectedNoteId}`,
           {},
           {
-            headers: { "x-admin-secret": ADMIN_SECRET },
+            headers: { Authorization: token ? `Bearer ${token}` : "" },
           }
         );
         setSnackbar({
@@ -114,10 +103,11 @@ const AdminPage = () => {
         );
         fetchApprovedNotes();
       } else if (dialogAction === "reject" || dialogAction === "delete") {
+        const token = localStorage.getItem("adminToken");
         await axios.delete(
-          `https://notes-nest-b.onrender.com/api/notes/delete/${selectedNoteId}`,
+          `http://localhost:5000/api/notes/delete/${selectedNoteId}`,
           {
-            headers: { "x-admin-secret": ADMIN_SECRET },
+            headers: { Authorization: token ? `Bearer ${token}` : "" },
           }
         );
         setSnackbar({
@@ -146,7 +136,7 @@ const AdminPage = () => {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem("admin-secret");
+    localStorage.removeItem("adminToken");
     window.location.href = "/";
   };
 

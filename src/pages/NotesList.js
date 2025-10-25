@@ -20,6 +20,7 @@ import Fuse from "fuse.js";
 import axios from "axios";
 
 const NotesList = () => {
+  const backendUrl = process.env.REACT_APP_BACKEND_URL;
   const [notes, setNotes] = useState([]);
   const [filteredNotes, setFilteredNotes] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
@@ -35,19 +36,36 @@ const NotesList = () => {
     });
   }, [notes]);
 
+  const [error, setError] = useState(null);
+  const maxRetries = 3;
+  const retryDelay = 1000; // 1 second
+
+  const fetchNotes = async (retryCount = 0) => {
+    try {
+      const res = await axios.get(`${backendUrl}/api/notes/approved`, {
+        timeout: 10000, // 10 second timeout
+      });
+      setNotes(res.data);
+      setFilteredNotes(res.data);
+      setError(null);
+    } catch (err) {
+      console.error("Error fetching notes:", err);
+
+      if (retryCount < maxRetries) {
+        console.log(`Retrying... Attempt ${retryCount + 1} of ${maxRetries}`);
+        setTimeout(
+          () => fetchNotes(retryCount + 1),
+          retryDelay * (retryCount + 1)
+        );
+      } else {
+        setError("Unable to fetch notes. Please try again later.");
+      }
+    }
+  };
+
   useEffect(() => {
     setLoading(true);
-    axios
-      .get("https://notes-nest-b.onrender.com/api/notes/approved")
-      .then((res) => {
-        setNotes(res.data);
-        setFilteredNotes(res.data);
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error("Error fetching notes:", err);
-        setLoading(false);
-      });
+    fetchNotes().finally(() => setLoading(false));
   }, []);
 
   useEffect(() => {
@@ -77,8 +95,8 @@ const NotesList = () => {
         </Typography>
       </Box>
 
-      <Grid container spacing={2} justifyContent="center" sx={{ mb: 4 }}>
-        <Grid item xs={12} md={6}>
+      <Grid container spacing={2} sx={{ mb: 4 }}>
+        <Grid flex={1} minWidth={{ xs: "100%", md: "50%" }}>
           <TextField
             fullWidth
             label="Search notes..."
@@ -95,7 +113,7 @@ const NotesList = () => {
           />
         </Grid>
 
-        <Grid item xs={12} md={4}>
+        <Grid flex={1} minWidth={{ xs: "100%", md: "33.33%" }}>
           <TextField
             select
             fullWidth
@@ -118,6 +136,21 @@ const NotesList = () => {
         <Box sx={{ display: "flex", justifyContent: "center", mt: 6 }}>
           <CircularProgress color="primary" />
         </Box>
+      ) : error ? (
+        <Typography color="error" align="center" sx={{ mt: 4 }}>
+          {error}
+          <Button
+            variant="text"
+            color="primary"
+            onClick={() => {
+              setLoading(true);
+              fetchNotes().finally(() => setLoading(false));
+            }}
+            sx={{ ml: 2 }}
+          >
+            Retry
+          </Button>
+        </Typography>
       ) : filteredNotes.length === 0 ? (
         <Typography variant="body1" sx={{ mx: "auto", mt: 5 }}>
           No notes found.
@@ -125,7 +158,11 @@ const NotesList = () => {
       ) : (
         <Grid container spacing={3}>
           {filteredNotes.map((note) => (
-            <Grid item xs={12} sm={6} md={4} key={note._id}>
+            <Grid
+              key={note._id}
+              flex={1}
+              minWidth={{ xs: "100%", sm: "50%", md: "33.33%" }}
+            >
               <Card elevation={4} sx={{ borderRadius: 2 }}>
                 <CardContent>
                   <Typography variant="h6" sx={{ mb: 1 }}>

@@ -59,7 +59,11 @@ const NotesList = () => {
             retryDelay * (retryCount + 1)
           );
         } else {
-          setError("Unable to fetch notes. Please try again later.");
+          // Provide more info to help debugging (HTTP status or message)
+          const status = err?.response?.status || "N/A";
+          const message =
+            err?.response?.data?.message || err.message || "Unknown error";
+          setError(`Unable to fetch notes. ${message} (status: ${status})`);
         }
       }
     },
@@ -140,20 +144,42 @@ const NotesList = () => {
           <CircularProgress color="primary" />
         </Box>
       ) : error ? (
-        <Typography color="error" align="center" sx={{ mt: 4 }}>
-          {error}
-          <Button
-            variant="text"
-            color="primary"
-            onClick={() => {
-              setLoading(true);
-              fetchNotes().finally(() => setLoading(false));
-            }}
-            sx={{ ml: 2 }}
+        <Box sx={{ textAlign: "center", mt: 4 }}>
+          <Typography color="error" align="center">
+            {error}
+          </Typography>
+          <Box sx={{ mt: 1 }}>
+            <Button
+              variant="text"
+              color="primary"
+              onClick={() => {
+                setLoading(true);
+                fetchNotes().finally(() => setLoading(false));
+              }}
+              sx={{ ml: 0 }}
+            >
+              Retry
+            </Button>
+            <Button
+              variant="text"
+              color="secondary"
+              href={`${backendUrl}/api/notes/approved`}
+              target="_blank"
+              rel="noopener noreferrer"
+              sx={{ ml: 2 }}
+            >
+              Open backend endpoint
+            </Button>
+          </Box>
+          <Typography
+            variant="caption"
+            display="block"
+            sx={{ mt: 1, color: "gray" }}
           >
-            Retry
-          </Button>
-        </Typography>
+            If this persists, verify that `REACT_APP_BACKEND_URL` is set and the
+            backend is reachable.
+          </Typography>
+        </Box>
       ) : filteredNotes.length === 0 ? (
         <Typography variant="body1" sx={{ mx: "auto", mt: 5 }}>
           No notes found.

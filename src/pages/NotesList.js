@@ -1,5 +1,5 @@
 // src/pages/NotesList.js
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo, useCallback } from "react";
 import logo from "../assets/logo.gif";
 
 import {
@@ -40,33 +40,36 @@ const NotesList = () => {
   const maxRetries = 3;
   const retryDelay = 1000; // 1 second
 
-  const fetchNotes = async (retryCount = 0) => {
-    try {
-      const res = await axios.get(`${backendUrl}/api/notes/approved`, {
-        timeout: 10000, // 10 second timeout
-      });
-      setNotes(res.data);
-      setFilteredNotes(res.data);
-      setError(null);
-    } catch (err) {
-      console.error("Error fetching notes:", err);
+  const fetchNotes = useCallback(
+    async (retryCount = 0) => {
+      try {
+        const res = await axios.get(`${backendUrl}/api/notes/approved`, {
+          timeout: 10000, // 10 second timeout
+        });
+        setNotes(res.data);
+        setFilteredNotes(res.data);
+        setError(null);
+      } catch (err) {
+        console.error("Error fetching notes:", err);
 
-      if (retryCount < maxRetries) {
-        console.log(`Retrying... Attempt ${retryCount + 1} of ${maxRetries}`);
-        setTimeout(
-          () => fetchNotes(retryCount + 1),
-          retryDelay * (retryCount + 1)
-        );
-      } else {
-        setError("Unable to fetch notes. Please try again later.");
+        if (retryCount < maxRetries) {
+          console.log(`Retrying... Attempt ${retryCount + 1} of ${maxRetries}`);
+          setTimeout(
+            () => fetchNotes(retryCount + 1),
+            retryDelay * (retryCount + 1)
+          );
+        } else {
+          setError("Unable to fetch notes. Please try again later.");
+        }
       }
-    }
-  };
+    },
+    [backendUrl, maxRetries, retryDelay]
+  );
 
   useEffect(() => {
     setLoading(true);
     fetchNotes().finally(() => setLoading(false));
-  }, []);
+  }, [fetchNotes]);
 
   useEffect(() => {
     let results = notes;

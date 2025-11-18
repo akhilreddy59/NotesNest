@@ -20,7 +20,13 @@ import Fuse from "fuse.js";
 import axios from "axios";
 
 const NotesList = () => {
-  const backendUrl = process.env.REACT_APP_BACKEND_URL;
+  const backendUrl = process.env.REACT_APP_BACKEND_URL || "";
+  // Helper to build API URLs. If no backendUrl is provided, use relative paths
+  const apiUrl = (path) => {
+    if (!path.startsWith("/")) path = "/" + path;
+    if (backendUrl) return backendUrl.replace(/\/+$/, "") + path;
+    return path; // relative path (e.g. /api/notes/approved)
+  };
   const [notes, setNotes] = useState([]);
   const [filteredNotes, setFilteredNotes] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
@@ -43,7 +49,7 @@ const NotesList = () => {
   const fetchNotes = useCallback(
     async (retryCount = 0) => {
       try {
-        const res = await axios.get(`${backendUrl}/api/notes/approved`, {
+        const res = await axios.get(apiUrl("/api/notes/approved"), {
           timeout: 10000, // 10 second timeout
         });
         setNotes(res.data);
@@ -163,7 +169,7 @@ const NotesList = () => {
             <Button
               variant="text"
               color="secondary"
-              href={`${backendUrl}/api/notes/approved`}
+              href={apiUrl("/api/notes/approved")}
               target="_blank"
               rel="noopener noreferrer"
               sx={{ ml: 2 }}

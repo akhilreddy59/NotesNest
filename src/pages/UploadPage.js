@@ -14,7 +14,12 @@ import {
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import axios from "axios";
 
-const backendUrl = process.env.REACT_APP_BACKEND_URL;
+const backendUrl = process.env.REACT_APP_BACKEND_URL || "";
+const apiUrl = (path) => {
+  if (!path.startsWith("/")) path = "/" + path;
+  if (backendUrl) return backendUrl.replace(/\/+$/, "") + path;
+  return path; // relative path
+};
 
 const subjects = [
   "Mathematics",
@@ -62,7 +67,7 @@ const UploadPage = () => {
     };
 
     try {
-      await axios.post(`${backendUrl}/api/notes/upload`, data);
+      await axios.post(apiUrl("/api/notes/upload"), data);
 
       setSnackbar({
         open: true,

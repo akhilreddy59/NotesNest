@@ -22,12 +22,16 @@ import axios from "axios";
 const NotesList = () => {
   const backendUrl = process.env.REACT_APP_BACKEND_URL || "";
 
-  // Helper to build API URLs. If no backendUrl is provided, use relative paths
-  const apiUrl = (path) => {
-    if (!path.startsWith("/")) path = "/" + path;
-    if (backendUrl) return backendUrl.replace(/\/+$/, "") + path;
-    return path; // relative path (e.g. /api/notes/approved)
-  };
+  // Memoize apiUrl so it doesn't get re-created on every render.
+  // It only needs to change when backendUrl changes.
+  const apiUrl = useCallback(
+    (path) => {
+      if (!path.startsWith("/")) path = "/" + path;
+      if (backendUrl) return backendUrl.replace(/\/+$/, "") + path;
+      return path; // relative path (e.g. /api/notes/approved)
+    },
+    [backendUrl]
+  );
 
   const [notes, setNotes] = useState([]);
   const [filteredNotes, setFilteredNotes] = useState([]);
@@ -48,7 +52,7 @@ const NotesList = () => {
   const maxRetries = 3;
   const retryDelay = 1000; // 1 second
 
-  // FIX: remove backendUrl (unnecessary) from deps; include apiUrl (used)
+  // fetchNotes depends on apiUrl which is stable (memoized above)
   const fetchNotes = useCallback(
     async (retryCount = 0) => {
       try {
@@ -75,7 +79,7 @@ const NotesList = () => {
         }
       }
     },
-    [apiUrl, maxRetries, retryDelay] // backendUrl intentionally excluded
+    [apiUrl, maxRetries, retryDelay]
   );
 
   useEffect(() => {
@@ -232,4 +236,3 @@ const NotesList = () => {
 };
 
 export default NotesList;
-

@@ -21,12 +21,14 @@ import axios from "axios";
 
 const NotesList = () => {
   const backendUrl = process.env.REACT_APP_BACKEND_URL || "";
+
   // Helper to build API URLs. If no backendUrl is provided, use relative paths
   const apiUrl = (path) => {
     if (!path.startsWith("/")) path = "/" + path;
     if (backendUrl) return backendUrl.replace(/\/+$/, "") + path;
     return path; // relative path (e.g. /api/notes/approved)
   };
+
   const [notes, setNotes] = useState([]);
   const [filteredNotes, setFilteredNotes] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
@@ -46,11 +48,12 @@ const NotesList = () => {
   const maxRetries = 3;
   const retryDelay = 1000; // 1 second
 
+  // FIXED: apiUrl added to dependency array
   const fetchNotes = useCallback(
     async (retryCount = 0) => {
       try {
         const res = await axios.get(apiUrl("/api/notes/approved"), {
-          timeout: 10000, // 10 second timeout
+          timeout: 10000,
         });
         setNotes(res.data);
         setFilteredNotes(res.data);
@@ -65,7 +68,6 @@ const NotesList = () => {
             retryDelay * (retryCount + 1)
           );
         } else {
-          // Provide more info to help debugging (HTTP status or message)
           const status = err?.response?.status || "N/A";
           const message =
             err?.response?.data?.message || err.message || "Unknown error";
@@ -73,7 +75,7 @@ const NotesList = () => {
         }
       }
     },
-    [backendUrl, maxRetries, retryDelay]
+    [apiUrl, backendUrl, maxRetries, retryDelay] // ✅ FIXED
   );
 
   useEffect(() => {

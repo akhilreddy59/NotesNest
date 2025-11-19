@@ -48,7 +48,7 @@ const NotesList = () => {
   const maxRetries = 3;
   const retryDelay = 1000; // 1 second
 
-  // FIXED: apiUrl added to dependency array
+  // FIX: remove backendUrl (unnecessary) from deps; include apiUrl (used)
   const fetchNotes = useCallback(
     async (retryCount = 0) => {
       try {
@@ -75,7 +75,7 @@ const NotesList = () => {
         }
       }
     },
-    [apiUrl, backendUrl, maxRetries, retryDelay] // ✅ FIXED
+    [apiUrl, maxRetries, retryDelay] // backendUrl intentionally excluded
   );
 
   useEffect(() => {
@@ -232,3 +232,4 @@ const NotesList = () => {
 };
 
 export default NotesList;
+

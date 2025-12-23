@@ -2,6 +2,8 @@
 
 A React-based frontend for the Notes Nest application, allowing users to share and manage educational notes.
 
+# Live project link
+[Visit the site](https://notesnest09.netlify.app/)
 ## 🚀 Quick Start
 
 1. Clone the repository

@@ -4,6 +4,9 @@ A React-based frontend for the Notes Nest application, allowing users to share a
 
 # Live project link
 [Visit the site](https://notesnest09.netlify.app/)
+
+
+[for backend](https://github.com/akhilreddy59/notes-nest-backend)
 ## 🚀 Quick Start
 
 1. Clone the repository
